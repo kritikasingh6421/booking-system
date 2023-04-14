@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nagarro.payment.constants.Constant;
 import com.nagarro.payment.dao.PaymentDao;
-import com.nagarro.payment.pojo.Payment;
+import com.nagarro.payment.entity.Payment;
 
 /**
  * @author kritikasingh02

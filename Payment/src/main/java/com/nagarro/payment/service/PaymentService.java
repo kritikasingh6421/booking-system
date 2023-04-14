@@ -5,7 +5,7 @@ package com.nagarro.payment.service;
 
 import java.util.List;
 
-import com.nagarro.payment.pojo.Payment;
+import com.nagarro.payment.entity.Payment;
 
 /**
  * @author kritikasingh02

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.nagarro.payment.pojo;
+package com.nagarro.payment.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
