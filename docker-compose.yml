@@ -1,0 +1,139 @@
+version: "3"
+
+services:
+  database:
+    container_name: booking-db
+    image: mysql:8.0.32
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - mysql:/var/lib/mysql
+    restart: on-failure
+
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    restart: on-failure
+
+  discovery-server:
+    container_name: discovery-server
+    image: kritikasingh02/discovery-server:v2
+    links:
+      - zipkin
+    ports:
+      - "8761:8761"
+    environment:
+      - ZIPKIN_SERVER_HOST=zipkin
+    volumes:
+      - data-volume:/workspace/logs
+    restart: on-failure
+
+  gateway:
+    container_name: gateway
+    image: kritikasingh02/gateway:v2
+    links:
+      - discovery-server
+      - zipkin
+    environment:
+      - DISCOVERY_SERVER_HOST=discovery-server
+      - ZIPKIN_SERVER_HOST=zipkin
+    ports:
+      - "9999:9999"
+    depends_on:
+      - discovery-server
+    volumes:
+      - data-volume:/workspace/logs
+    restart: on-failure
+
+  login:
+    container_name: login
+    image: kritikasingh02/login:v2
+    links:
+      - discovery-server
+      - database
+      - zipkin
+    environment:
+      - DISCOVERY_SERVER_HOST=discovery-server
+      - ZIPKIN_SERVER_HOST=zipkin
+      - DB_HOST=booking-db
+    ports:
+      - "8088:8088"
+    depends_on:
+      - discovery-server
+      - gateway
+      - database
+    volumes:
+      - data-volume:/workspace/logs
+    restart: on-failure
+
+  Hotel:
+    container_name: hotel-search
+    image: kritikasingh02/hotel-search:v2
+    links:
+      - discovery-server
+      - database
+      - zipkin
+    environment:
+      - DISCOVERY_SERVER_HOST=discovery-server
+      - ZIPKIN_SERVER_HOST=zipkin
+      - DB_HOST=booking-db
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-server
+      - database
+      - gateway
+    volumes:
+      - data-volume:/workspace/logs
+    restart: on-failure
+
+  Flight:
+    container_name: flight-search
+    image: kritikasingh02/flight-search:v2
+    links:
+      - discovery-server
+      - database
+      - zipkin
+    environment:
+      - DISCOVERY_SERVER_HOST=discovery-server
+      - ZIPKIN_SERVER_HOST=zipkin
+      - DB_HOST=booking-db
+    ports:
+      - "8084:8084"
+    depends_on:
+      - discovery-server
+      - database
+      - gateway
+    volumes:
+      - data-volume:/workspace/logs
+    restart: on-failure
+
+  payment:
+    container_name: payment
+    image: kritikasingh02/payment:v1
+    links:
+      - discovery-server
+      - database
+      - zipkin
+    environment:
+      - DISCOVERY_SERVER_HOST=discovery-server
+      - ZIPKIN_SERVER_HOST=zipkin
+      - DB_HOST=booking-db
+    ports:
+      - "8086:8086"
+    depends_on:
+      - discovery-server
+      - database
+      - gateway
+    volumes:
+      - data-volume:/workspace/logs
+    restart: on-failure
+
+volumes:
+  data-volume:
+  mysql:
