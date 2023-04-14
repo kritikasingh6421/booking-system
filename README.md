@@ -28,7 +28,7 @@
 
 ## **Micro Services**
 
-![MicroServices](image/../Images/microservice.png)
+![MicroServices](Images/microservice.png)
 
 **1. Discovery Server:**
 
